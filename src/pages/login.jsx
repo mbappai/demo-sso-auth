@@ -25,7 +25,9 @@ export default function Login(){
                   duration: 9000,
                   isClosable: true,
                 })
+                
                 actions.setSubmitting(false)
+
                 console.log(data,error)
 
         }catch(err){
@@ -50,8 +52,10 @@ export default function Login(){
         navigate('/signUp')
       }
 
+      
+
     return(
-        <Flex height={'100vh'} width={'500px'}  direction='column'  justifyContent={'center'} alignItems={'flex-start'}> 
+        <Flex height={'100vh'}  maxWidth={'500px'} w='500px' direction='column'  justifyContent={'center'} alignItems={'flex-start'}> 
                 <Heading mb='9'>Login</Heading>
                 <Formik 
                 initialValues={{ email: '', password: '' }}
