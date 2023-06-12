@@ -1,62 +1,71 @@
-import { Flex, Text,Button,FormControl, HStack, useToast, FormLabel, FormErrorMessage, Input, Heading } from "@chakra-ui/react";
+import { Flex, Text,Button,FormControl, useToast, FormLabel, HStack, FormErrorMessage, Input, Heading } from "@chakra-ui/react";
 import { Field, Form, Formik } from 'formik';
-import {useNavigate} from "react-router-dom"
+import {useNavigate}  from 'react-router-dom'
+
 import {supabase} from '../utils/supabase'
- 
 
-export default function Login(){
 
-    const navigate = useNavigate()
+export default function SignUp(){
+
 
     const toast  = useToast()
 
-    async function signInWithEmail(values,actions) {
-        console.log(values)
+    const navigate = useNavigate()
+
+    async function signUpWithEmail(values,actions) {
+
         try{
-            const { data, error } = await supabase.auth.signInWithPassword({
+            const { data, error } = await supabase.auth.signUp({
                 email: values.email,
                 password: values.password,
               })
-      
+              
+              console.log(data, error)
+
               toast({
-                  title: 'Login successfully',
-                  description: "You have successfully logged into account.",
+                  title: 'Account created.',
+                  description: "We've created your account for you.",
                   status: 'success',
                   duration: 9000,
                   isClosable: true,
                 })
+
                 actions.setSubmitting(false)
-                console.log(data,error)
 
         }catch(err){
-
-            console.log('error signing In with email',err)
-      
+            
+            console.log('error signing Up user with email', err)
+        
               toast({
-                  title: 'Problem loggin into your account.',
-                  description: "err.message",
-                  status: 'error',
+                  title: 'Problem creating your account.',
+                  description: "Theres been a problem whitle trying to create your account",
+                  status: 'success',
                   duration: 9000,
                   isClosable: true,
                 })
+
                 actions.setSubmitting(false)
+
         }
        
 
-        actions.setSubmitting(false)
+        console.log('res',data)
+        console.log('res',error)
+
+       
       }
 
-      function gotoSignUp(){
-        navigate('/signUp')
+      function gotoLogin(){
+        navigate('/')  // which is same as login page
       }
 
     return(
         <Flex height={'100vh'} width={'500px'}  direction='column'  justifyContent={'center'} alignItems={'flex-start'}> 
-                <Heading mb='9'>Login</Heading>
+                <Heading mb='9'>Sign Up</Heading>
                 <Formik 
                 initialValues={{ email: '', password: '' }}
                 onSubmit={(values, actions) => {
-                   signInWithEmail(values, actions)
+                   signUpWithEmail(values, actions)
                 }}
                 >
                     {(props) => (
@@ -85,14 +94,14 @@ export default function Login(){
                             isLoading={props.isSubmitting}
                             type='submit'
                         >
-                            Login
+                            Sign Up
                         </Button>
                         </Form>
                     )}
                     </Formik>
                     <HStack w="100%" mt={3} spacing={2}>
-                        <Text>Don't have an account?</Text>
-                        <Button onClick={gotoSignUp} variant="link">Sign Up</Button>
+                        <Text>Already have an account?</Text>
+                        <Button onClick={gotoLogin} variant="link">Login</Button>
                     </HStack>
         </Flex>
     )
