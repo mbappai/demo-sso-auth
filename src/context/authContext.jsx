@@ -7,10 +7,10 @@ import React, {
   useEffect,
 } from "react";
 
-
-
+import {useNavigate} from 'react-router-dom'
 import {supabase} from '../utils/supabase'
 import getPaseto from "../utils/paseto";
+
 
 
 
@@ -24,49 +24,91 @@ const AuthContextProvider = ({ children }) => {
     //   // const pasetoFromStorage = localStorage.getItem("PLATFORM_PASETO")
     //   // return pasetoFromStorage
     // })
+    const navigate = useNavigate()
     const [session, setSession] = useState()
     const [isAuthenticated, setIsAuthenticated] = useState(true)
 
 
 
+    useEffect(()=>{
+
+      if(!isAuthenticated){
+
+        console.log('called here')
+
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          const accessToken = session['access_token']
+          getPaseto(accessToken).then(res=>{
+            console.log('coming from inside',res)
+            // setPaseto hear
+          })
+          // call backend API to give you paseto
+          // console.log(session)
+        })
+      }
+
+    },[isAuthenticated])
 
     // Event listener provided by supabase which checks the session of a user whenever the app is loaded
     // 
     useEffect(() => {
 
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        const accessToken = session['access_token']
-        getPaseto(accessToken).then(res=>{
-          console.log('coming from inside',res)
-        })
-        // call backend API to give you paseto
-        // console.log(session)
-      })
+     
 
-      const {
-        data: { subscription },
-      } = supabase.auth.onAuthStateChange((_event, session) => {
-        console.log('eventType',_event)
+      const { data: { subscription },} = supabase.auth.onAuthStateChange((_event, session) => {
         // only set the paseto in storage when the user signs in
         if(_event === 'SIGNED_IN'){
-          if(!isAuthenticated){
-            // check if paseto exist in local storage
-            const pasetoFromStorage = localStorage.getItem('PLATFORM_PASETO')
-            if(pasetoFromStorage){
-              setIsAuthenticated(true)
-            }
-          }
-          setSession(session)
+
+          console.log('user just signed in')
+
+          
+          supabase.auth.getSession().then(({ data: { session } }) => {
+            const accessToken = session['access_token']
+            getPaseto(accessToken).then(res=>{
+              // check if status is 200 and confirm data object is not empty
+              if(res.statusCode > 200 && res.data !== ''){
+                console.log('error while fetching your paseto token')
+                console.log('You might want to show a toast here explaining error')
+              }else{
+                const paseto = res.payload.token
+                // set paseto to local storage
+                localStorage.setItem('PLATFORM_PASETO',paseto)
+                setIsAuthenticated(true) 
+
+                // redirect user to redirect page
+                navigate('/redirect')
+              }
+              
+              // set authenticated state only after we get the paseto
+            })
+            // call backend API to give you paseto
+            // console.log(session)
+          })
+          // if(!isAuthenticated){
+          //   // check if paseto exist in local storage
+          //   const pasetoFromStorage = localStorage.getItem('PLATFORM_PASETO')
+          //   if(pasetoFromStorage){
+          //     setIsAuthenticated(true)
+          //   }
+          // }
+          // setSession(session)
       }
+        if(_event === 'SIGNED_OUT'){
+          console.log('clear platform paseto here')
+        } 
       })
 
       return () => subscription.unsubscribe()    }, [])
  
   
+      function signOut(){
+        supabase.auth.signOut() 
+      }
 
 
   const values = {
-    isAuthenticated
+    isAuthenticated,
+    signOut
   };
 
   return <AuthContext.Provider value={values}>{children}</AuthContext.Provider>

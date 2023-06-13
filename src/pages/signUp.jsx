@@ -62,7 +62,7 @@ export default function SignUp(){
       }
 
       const display = hasSentConfirmEmail
-      ?<Flex width={'500px'} height='400px' border='1px solid #333333' justifyContent={'center'} alignItems={'center'}>
+      ?<Flex width={'500px'} height='200px'  direction={'column'} border='1px solid #e5e5e5' justifyContent={'center'} alignItems={'center'}>
             <Heading>
                 Check your email
             </Heading>

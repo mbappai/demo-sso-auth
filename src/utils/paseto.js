@@ -7,7 +7,6 @@ export default async function getPaseto(accessToken){
         type: 'web2'
     })
 
-    console.log(res)
     return res.data
 
 }

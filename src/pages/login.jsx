@@ -2,6 +2,7 @@ import { Flex, Text,Button,FormControl, HStack, useToast, FormLabel, FormErrorMe
 import { Field, Form, Formik } from 'formik';
 import {useNavigate} from "react-router-dom"
 import {supabase} from '../utils/supabase'
+import { useAuthContext } from "../context/authContext";
  
 
 export default function Login(){
@@ -9,6 +10,8 @@ export default function Login(){
     const navigate = useNavigate()
 
     const toast  = useToast()
+
+    const {signOut} = useAuthContext()
 
     async function signInWithEmail(values,actions) {
         console.log(values)
@@ -48,14 +51,20 @@ export default function Login(){
         actions.setSubmitting(false)
       }
 
+
       function gotoSignUp(){
         navigate('/signUp')
       }
 
+
+      
       
 
     return(
         <Flex height={'100vh'}  maxWidth={'500px'} w='500px' direction='column'  justifyContent={'center'} alignItems={'flex-start'}> 
+            <Flex as={'header'}>
+                <Button variant={'solid'} onClick={signOut}>Logout</Button>
+            </Flex>
                 <Heading mb='9'>Login</Heading>
                 <Formik 
                 initialValues={{ email: '', password: '' }}
@@ -98,6 +107,7 @@ export default function Login(){
                         <Text>Don't have an account?</Text>
                         <Button onClick={gotoSignUp} variant="link">Sign Up</Button>
                     </HStack>
+                    
         </Flex>
     )
 }
