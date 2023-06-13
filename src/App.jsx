@@ -6,20 +6,20 @@ import Login from './pages/login'
 import Redirect from './pages/redirect'
 
 
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <Login />,
-  },
-  {
-    path: "signUp",
-    element: <SignUp/>,
-  },
-  {
-    path: "redirect",
-    element: <Redirect/>,
-  },
-]);
+// const router = createBrowserRouter([
+//   {
+//     path: "/",
+//     element: <Login />,
+//   },
+//   {
+//     path: "signUp",
+//     element: <SignUp/>,
+//   },
+//   {
+//     path: "redirect",
+//     element: <Redirect/>,
+//   },
+// ]);
 
 
 function App() {
@@ -28,12 +28,12 @@ function App() {
 
   return (
     <Flex width='100%' p={0}>
-     <RouterProvider router={router} />
-      {/* <Routes>
+     {/* <RouterProvider router={router} /> */}
+      <Routes>
           <Route path='/' element={<Login/>}/>
           <Route path='/signUp' element={<SignUp/>}/>
           <Route path='/redirect' element={<Redirect/>}/>
-      </Routes> */}
+      </Routes> 
     </Flex>
   )
 }
