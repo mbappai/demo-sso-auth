@@ -11,6 +11,7 @@ import {useNavigate} from 'react-router-dom'
 import {supabase} from '../utils/supabase'
 import getPaseto from "../utils/paseto";
 
+import {useToast} from '@chakra-ui/react'
 
 
 
@@ -24,9 +25,11 @@ const AuthContextProvider = ({ children }) => {
     //   // const pasetoFromStorage = localStorage.getItem("PLATFORM_PASETO")
     //   // return pasetoFromStorage
     // })
+    const toast  = useToast()
     const navigate = useNavigate()
     const [session, setSession] = useState()
-    const [isAuthenticated, setIsAuthenticated] = useState(true)
+    const [isAuthenticated, setIsAuthenticated] = useState(false)
+    const [isLoggingIn, setIsLoggingIn] = useState(false)
 
 
 
@@ -42,8 +45,7 @@ const AuthContextProvider = ({ children }) => {
             console.log('coming from inside',res)
             // setPaseto hear
           })
-          // call backend API to give you paseto
-          // console.log(session)
+
         })
       }
 
@@ -53,54 +55,84 @@ const AuthContextProvider = ({ children }) => {
     // 
     useEffect(() => {
 
-     
-
       const { data: { subscription },} = supabase.auth.onAuthStateChange((_event, session) => {
         // only set the paseto in storage when the user signs in
         if(_event === 'SIGNED_IN'){
-
-          console.log('user just signed in')
-
-          
+ 
           supabase.auth.getSession().then(({ data: { session } }) => {
             const accessToken = session['access_token']
             getPaseto(accessToken).then(res=>{
+
               // check if status is 200 and confirm data object is not empty
               if(res.statusCode > 200 && res.data !== ''){
-                console.log('error while fetching your paseto token')
-                console.log('You might want to show a toast here explaining error')
+
+                toast({
+                  title: 'Error fetching user paseto token',
+                  description: "Read console for more information",
+                  status: 'error',
+                  duration: 9000,
+                  isClosable: true,
+                })
+                setIsLoggingIn(false)
+
               }else{
+
+                setIsLoggingIn(false)
+
+                toast({
+                  title: 'Login successfully',
+                  description: "You have successfully logged into account.",
+                  status: 'success',
+                  duration: 9000,
+                  isClosable: true,
+                })
+
+                // Extract paseto from response
                 const paseto = res.payload.token
-                // set paseto to local storage
+
+                // Set paseto to local storage
                 localStorage.setItem('PLATFORM_PASETO',paseto)
+
                 setIsAuthenticated(true) 
 
-                // redirect user to redirect page
+                // Redirect user to redirect page
                 navigate('/redirect')
               }
               
-              // set authenticated state only after we get the paseto
             })
-            // call backend API to give you paseto
-            // console.log(session)
+
           })
-          // if(!isAuthenticated){
-          //   // check if paseto exist in local storage
-          //   const pasetoFromStorage = localStorage.getItem('PLATFORM_PASETO')
-          //   if(pasetoFromStorage){
-          //     setIsAuthenticated(true)
-          //   }
-          // }
-          // setSession(session)
+         
       }
         if(_event === 'SIGNED_OUT'){
-          console.log('clear platform paseto here')
+          localStorage.removeItem('PLATFORM_PASETO')
+          setIsAuthenticated(false)
         } 
       })
 
       return () => subscription.unsubscribe()    }, [])
  
   
+      async function signInWithPassword(email, password){
+          setIsLoggingIn(true)
+          const { data, error } = await supabase.auth.signInWithPassword({
+              email: email,
+              password: password,
+            })
+
+            // error will not be empty if user encounters any issues while trying to log in using supabase
+            if(error){
+              toast({
+                title: 'Error login in with supabase',
+                description: "There is an error while trying to log in with supabase",
+                status: 'error',
+                duration: 9000,
+                isClosable: true,
+              })
+            }
+     
+      }
+
       function signOut(){
         supabase.auth.signOut() 
       }
@@ -108,6 +140,8 @@ const AuthContextProvider = ({ children }) => {
 
   const values = {
     isAuthenticated,
+    isLoggingIn, 
+    signInWithPassword,
     signOut
   };
 

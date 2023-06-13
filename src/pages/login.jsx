@@ -11,44 +11,10 @@ export default function Login(){
 
     const toast  = useToast()
 
-    const {signOut} = useAuthContext()
+    const {signOut, isAuthenticated, isLoggingIn, signInWithPassword} = useAuthContext()
 
-    async function signInWithEmail(values,actions) {
-        console.log(values)
-        try{
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email: values.email,
-                password: values.password,
-              })
-      
-              toast({
-                  title: 'Login successfully',
-                  description: "You have successfully logged into account.",
-                  status: 'success',
-                  duration: 9000,
-                  isClosable: true,
-                })
-                
-                actions.setSubmitting(false)
-
-                console.log(data,error)
-
-        }catch(err){
-
-            console.log('error signing In with email',err)
-      
-              toast({
-                  title: 'Problem loggin into your account.',
-                  description: "err.message",
-                  status: 'error',
-                  duration: 9000,
-                  isClosable: true,
-                })
-                actions.setSubmitting(false)
-        }
-       
-
-        actions.setSubmitting(false)
+    async function signIn(values,actions) {
+      signInWithPassword(values.email, values.password)
       }
 
 
@@ -63,13 +29,13 @@ export default function Login(){
     return(
         <Flex height={'100vh'}  maxWidth={'500px'} w='500px' direction='column'  justifyContent={'center'} alignItems={'flex-start'}> 
             <Flex as={'header'}>
-                <Button variant={'solid'} onClick={signOut}>Logout</Button>
+                {isAuthenticated?<Button variant={'solid'} onClick={signOut}>Logout</Button>:null}
             </Flex>
                 <Heading mb='9'>Login</Heading>
                 <Formik 
                 initialValues={{ email: '', password: '' }}
                 onSubmit={(values, actions) => {
-                   signInWithEmail(values, actions)
+                   signIn(values, actions)
                 }}
                 >
                     {(props) => (
@@ -95,7 +61,7 @@ export default function Login(){
                         <Button
                             mt={4}
                             colorScheme='teal'
-                            isLoading={props.isSubmitting}
+                            isLoading={isLoggingIn}
                             type='submit'
                         >
                             Login
