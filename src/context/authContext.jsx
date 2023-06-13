@@ -73,6 +73,7 @@ const AuthContextProvider = ({ children }) => {
                   duration: 9000,
                   isClosable: true,
                 })
+                
                 setIsLoggingIn(false)
 
               }else{
@@ -114,13 +115,17 @@ const AuthContextProvider = ({ children }) => {
  
   
       async function signInWithPassword(email, password){
+
+        // This state is consumed by Login page in order to track the state of the login
+        // process that is happening here in the auth context
           setIsLoggingIn(true)
+
           const { data, error } = await supabase.auth.signInWithPassword({
               email: email,
               password: password,
             })
 
-            // error will not be empty if user encounters any issues while trying to log in using supabase
+            // Error will not be empty if user encounters any issues while trying to log in using supabase
             if(error){
               toast({
                 title: 'Error login in with supabase',
